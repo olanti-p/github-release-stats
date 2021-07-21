@@ -14,7 +14,7 @@ function getQueryVariable(variable) {
 
 // Validate the user input
 function validateInput() {
-    if ($("#username").val().length > 0 && $("#repository").val().length > 0) {
+    if ($("#username").val().length > 0 && $("#repository").val().length > 0 && $("#page").val().length > 0) {
         $("#get-stats-button").prop("disabled", false);
     } else {
         $("#get-stats-button").prop("disabled", true);
@@ -168,8 +168,9 @@ function showStats(data) {
 function getStats() {
     var user = $("#username").val();
     var repository = $("#repository").val();
+    var page = $("#page").val();
 
-    var url = apiRoot + "repos/" + user + "/" + repository + "/releases";
+    var url = apiRoot + "repos/" + user + "/" + repository + "/releases" + "?page=" + page;
     $.getJSON(url, showStats).fail(showStats);
 }
 
@@ -178,28 +179,32 @@ $(function() {
     $("#loader-gif").hide();
 
     validateInput();
-    $("#username, #repository").keyup(validateInput);
+    $("#username, #repository, #page").keyup(validateInput);
 
     $("#username").change(getUserRepos);
 
     $("#get-stats-button").click(function() {
         window.location = "?username=" + $("#username").val() +
-            "&repository=" + $("#repository").val();
+            "&repository=" + $("#repository").val() +
+            "&page=" + $("#page").val();
     });
 
     $('#repository').on('keypress',function(e) {
         if(e.which == 13) {
             window.location = "?username=" + $("#username").val() +
-            "&repository=" + $("#repository").val();
+            "&repository=" + $("#repository").val() +
+            "&page=" + $("#page").val();
         }
     });
 
     var username = getQueryVariable("username");
     var repository = getQueryVariable("repository");
+    var page = getQueryVariable("page");
 
-    if(username != "" && repository != "") {
+    if(username != "" && repository != "" && page != "") {
         $("#username").val(username);
         $("#repository").val(repository);
+        $("#page").val(page);
         validateInput();
         getUserRepos();
         $(".output").hide();
