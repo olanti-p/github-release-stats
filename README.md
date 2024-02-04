@@ -1,5 +1,8 @@
-## [GitHub Release Stats](https://tooomm.github.io/github-release-stats/)
+## GitHub Release Stats
 Get the latest release stats of any GitHub project!
 
-<br>
-<sup>Hosted on GitHub Pages &mdash; forked from <a href="https://github.com/Somsubhra/github-release-stats">Somsubhra's repo</a><sub>
+Supports pagination and search by tag.
+
+https://olanti-p.github.io/github-release-stats/
+
+Hosted on GitHub Pages; forked from https://github.com/tooomm/github-release-stats

@@ -12,9 +12,14 @@ function getQueryVariable(variable) {
     return "";
 }
 
+function isNumeric(value) {
+    return /^\d+$/.test(value);
+}
+
 // Validate the user input
 function validateInput() {
-    if ($("#username").val().length > 0 && $("#repository").val().length > 0 && $("#page").val().length > 0) {
+    if ($("#username").val().length > 0 && $("#repository").val().length > 0 && 
+    ($("#page").val().length == 0) || isNumeric( $("#page").val() )) {
         $("#get-stats-button").prop("disabled", false);
     } else {
         $("#get-stats-button").prop("disabled", true);
@@ -74,6 +79,10 @@ function showStats(data) {
         html += "<div class='col-md-6 col-md-offset-3 output'>";
         var latest = true;
         var totalDownloadCount = 0;
+
+        if (!Array.isArray(data)) {
+            data = [ data ]
+        }
 
         // Sort by publish date
         data.sort(function(a, b) {
@@ -164,14 +173,42 @@ function showStats(data) {
     resultDiv.slideDown();
 }
 
+function get_page() {
+    var page_raw = $("#page").val()
+    return isNumeric( page_raw ) ? page_raw : "1";
+}
+
+function get_tag() {
+    return $("#release_tag").val()
+}
+
 // Callback function for getting release stats
 function getStats() {
     var user = $("#username").val();
     var repository = $("#repository").val();
-    var page = $("#page").val();
+    var page = get_page();
+    var tag = $("#release_tag").val();
 
-    var url = apiRoot + "repos/" + user + "/" + repository + "/releases" + "?page=" + page;
+    var url = apiRoot + "repos/" + user + "/" + repository + "/releases";
+    if (tag.length > 0) {
+        url += "/tags/" + tag;
+    }
+    if (page !== "1") {
+        url += "?page=" + page;
+    }
     $.getJSON(url, showStats).fail(showStats);
+}
+
+function build_location_string() {
+    var loc = "?username=" + $("#username").val() +
+    "&repository=" + $("#repository").val();
+    if (get_page() !== "1") {
+        loc += "&page=" + $("#page").val()
+    }
+    if (get_tag().length > 0) {
+        loc += "&release_tag=" + $("#release_tag").val()
+    }
+    return loc;
 }
 
 // The main function
@@ -179,32 +216,30 @@ $(function() {
     $("#loader-gif").hide();
 
     validateInput();
-    $("#username, #repository, #page").keyup(validateInput);
+    $("#username, #repository, #page, #release_tag").keyup(validateInput);
 
     $("#username").change(getUserRepos);
 
     $("#get-stats-button").click(function() {
-        window.location = "?username=" + $("#username").val() +
-            "&repository=" + $("#repository").val() +
-            "&page=" + $("#page").val();
+        window.location = build_location_string();
     });
 
     $('#repository').on('keypress',function(e) {
         if(e.which == 13) {
-            window.location = "?username=" + $("#username").val() +
-            "&repository=" + $("#repository").val() +
-            "&page=" + $("#page").val();
+            window.location = build_location_string();
         }
     });
 
     var username = getQueryVariable("username");
     var repository = getQueryVariable("repository");
     var page = getQueryVariable("page");
+    var release_tag = getQueryVariable("release_tag");
 
-    if(username != "" && repository != "" && page != "") {
+    if(username != "" && repository != "") {
         $("#username").val(username);
         $("#repository").val(repository);
         $("#page").val(page);
+        $("#release_tag").val(release_tag);
         validateInput();
         getUserRepos();
         $(".output").hide();
